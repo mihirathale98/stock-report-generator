@@ -19,7 +19,7 @@ def main():
     print("Preprocessing text...")
     paragraphs = preprocessor.split_into_paragraphs(text)
     print("Encoding paragraphs...")
-    encodings = model.encode_batch(paragraphs)
+    encodings = model.encode_text(paragraphs)
     print("Indexing...")
     indexer.create_index(encodings)
     print("Index Ready...")
