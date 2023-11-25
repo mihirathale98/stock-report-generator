@@ -1,18 +1,20 @@
 import numpy as np
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModel
-
+import torch
 
 class EncoderModel:
     def __init__(self, model_name):
         self.model_name = model_name
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
+        self.model.to(self.device)
 
     def encode_batch(self, text_batch):
         return self.model(
             **self.tokenizer(text_batch, return_tensors="pt", max_length=self.model.config.max_position_embeddings,
-                             truncation=True, padding=True))
+                             truncation=True, padding=True).to(self.device))
 
     def encode_text(self, text_list, batch_size=32):
         encodings = np.zeros((len(text_list), 768))

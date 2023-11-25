@@ -1,4 +1,5 @@
 import re
+import os
 from transformers import AutoTokenizer
 import nltk
 import json
@@ -27,11 +28,18 @@ class Preprocessor:
                 para = " ".join([para, sentence])
                 sentence = sentences.pop(0)
             self.paragraphs.append(para)
+        self.save_id2para_map()
         return self.paragraphs
 
     def save_id2para_map(self):
-        self.id2para_map = {i: para for i, para in enumerate(self.paragraphs)}
-        with open('id2para_map.json', 'w') as f:
+        if os.path.exists('../id2para_map.json'):
+            with open('id2para_map.json', 'r') as f:
+                self.id2para_map = json.load(f)
+            for i, para in enumerate(self.paragraphs):
+                self.id2para_map[i] = para
+        else:
+            self.id2para_map = {i: para for i, para in enumerate(self.paragraphs)}
+        with open('../id2para_map.json', 'w') as f:
             json.dump(self.id2para_map, f)
 
     def clean_text(self, text):

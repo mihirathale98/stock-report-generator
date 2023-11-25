@@ -1,10 +1,10 @@
+import requests
 import json
-import finnhub
 
 
-with open('key.json', 'r') as f:
-    API_KEY = json.load(f)['api_key']
-
-finnhub_client = finnhub.Client(api_key=API_KEY)
-
-print(finnhub_client.transcripts_list('AAPL'))
+def get_jsonparsed_data(url, company, quarter, year):
+    url = (f"https://discountingcashflows.com/api/transcript/{company}/{quarter}/{year}")
+    response = requests.get(url)
+    data = response.json()
+    transcript = data[0]['content']
+    return transcript
