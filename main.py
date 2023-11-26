@@ -16,7 +16,7 @@ model = EncoderModel('distilbert-base-uncased')
 preprocessor = Preprocessor('distilbert-base-uncased')
 print("Initializing index...")
 indexer = FAISSIndexer(768)
-reader = ReaderModel('bigscience/bloom-560m')
+reader = ReaderModel('TinyLlama/TinyLlama-1.1B-Chat-v0.6')
 
 
 def load_file(file_path):
@@ -50,7 +50,7 @@ def load_map(path):
     return ID_2_MAP
 
 if __name__ == '__main__':
-    ID_2_MAP = load_map('id2para_map.json')
     build_index(earnings_call_files)
+    ID_2_MAP = load_map('id2para_map.json')
     print(get_answer("How does the call sentiment look like?"))
 

@@ -32,14 +32,16 @@ class Preprocessor:
         return self.paragraphs
 
     def save_id2para_map(self):
-        if os.path.exists('../id2para_map.json'):
+        if os.path.exists('id2para_map.json'):
             with open('id2para_map.json', 'r') as f:
                 self.id2para_map = json.load(f)
             for i, para in enumerate(self.paragraphs):
-                self.id2para_map[i] = para
+                l = len(self.id2para_map.keys())
+                self.id2para_map[i + l - 1] = para
         else:
             self.id2para_map = {i: para for i, para in enumerate(self.paragraphs)}
-        with open('../id2para_map.json', 'w') as f:
+        print("saving id2para_map")
+        with open('id2para_map.json', 'w') as f:
             json.dump(self.id2para_map, f)
 
     def clean_text(self, text):
