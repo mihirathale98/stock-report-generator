@@ -3,6 +3,10 @@ from src.indexer import FAISSIndexer
 from src.encoder import EncoderModel
 from src.preprocessor import Preprocessor
 from src.reader import ReaderModel
+import torch
+
+print(torch.cuda.is_available())
+
 
 earnings_call_files = ['AMC Q4 2020.txt']
 
@@ -12,7 +16,7 @@ model = EncoderModel('distilbert-base-uncased')
 preprocessor = Preprocessor('distilbert-base-uncased')
 print("Initializing index...")
 indexer = FAISSIndexer(768)
-reader = ReaderModel('xzuyn/RedPajama-INCITE-Instruct-v0.1-7B-GGML')
+reader = ReaderModel('bigscience/bloom-560m')
 
 
 def load_file(file_path):
