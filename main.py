@@ -36,8 +36,8 @@ def get_answer(query):
     query_encoding = model.encode_text([query])
     relevant_paragraphs = retrieve_paragraphs(query_encoding)
     context = ""
-    for pid in relevant_paragraphs[0]:
-        context += ID_2_MAP[pid] + "\n"
+    for pid in relevant_paragraphs[1][0]:
+        context += ID_2_MAP[str(pid)] + "\n"
     answer = reader.generate_response(context)
     return answer
 
@@ -52,5 +52,6 @@ def load_map(path):
 if __name__ == '__main__':
     build_index(earnings_call_files)
     ID_2_MAP = load_map('id2para_map.json')
+    
     print(get_answer("How does the call sentiment look like?"))
 
