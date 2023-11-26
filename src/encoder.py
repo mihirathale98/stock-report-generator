@@ -12,14 +12,14 @@ class EncoderModel:
         self.model.to(self.device)
 
     def encode_batch(self, text_batch):
-        return self.model(
-            **self.tokenizer(text_batch, return_tensors="pt", max_length=self.model.config.max_position_embeddings,
+	with torch.no_grad():
+	    out = self.model(**self.tokenizer(text_batch, return_tensors="pt", max_length=self.model.config.max_position_embeddings,
                              truncation=True, padding=True).to(self.device))
-
+	return out
     def encode_text(self, text_list, batch_size=32):
         encodings = np.zeros((len(text_list), 768))
         for i in tqdm(range(0, len(text_list), batch_size), desc="Encoding passages"):
             text_batch = text_list[i:i + batch_size]
             encodings_batch = self.encode_batch(text_batch)
-            encodings[i:i + batch_size] = encodings_batch.last_hidden_state[:, 0, :].detach().numpy()
+            encodings[i:i + batch_size] = encodings_batch.last_hidden_state[:, 0, :].cpu().numpy()
         return encodings
