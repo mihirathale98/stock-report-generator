@@ -3,6 +3,10 @@ from src.indexer import FAISSIndexer
 from src.encoder import EncoderModel
 from src.preprocessor import Preprocessor
 from src.reader import ReaderModel
+import torch
+
+print(torch.cuda.is_available())
+
 
 earnings_call_files = ['AMC Q4 2020.txt']
 
@@ -12,7 +16,7 @@ model = EncoderModel('distilbert-base-uncased')
 preprocessor = Preprocessor('distilbert-base-uncased')
 print("Initializing index...")
 indexer = FAISSIndexer(768)
-reader = ReaderModel('xzuyn/RedPajama-INCITE-Instruct-v0.1-7B-GGML')
+reader = ReaderModel('TinyLlama/TinyLlama-1.1B-Chat-v0.6')
 
 
 def load_file(file_path):
@@ -46,7 +50,7 @@ def load_map(path):
     return ID_2_MAP
 
 if __name__ == '__main__':
-    ID_2_MAP = load_map('id2para_map.json')
     build_index(earnings_call_files)
+    ID_2_MAP = load_map('id2para_map.json')
     print(get_answer("How does the call sentiment look like?"))
 
