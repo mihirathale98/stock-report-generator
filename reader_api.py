@@ -6,13 +6,13 @@ from transformers import LlamaForCausalLM, LlamaTokenizer
 
 app = FastAPI()
 
-model_ckpt = 'mosaicml/mpt-7b-instruct'
-hf_model_path = 'mosaicml/mpt-7b-instruct'
+model_ckpt = 'meta-llama/Llama-2-7b-chat-hf'
+hf_model_path = 'meta-llama/Llama-2-7b-chat-hf'
 tokenizer = AutoTokenizer.from_pretrained(hf_model_path, trust_remote_code=True)
 config = AutoConfig.from_pretrained(hf_model_path, trust_remote_code=True, device_map="auto")
-config.init_device = "cuda"
+config.init_device = "cpu"
 config.max_seq_len = 4096
-device = 'cuda'
+device = 'cpu'
 config.attn_config['attn_impl'] = 'triton'
 model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
                                              torch_dtype=torch.bfloat16)
@@ -54,7 +54,7 @@ async def search(request: dict):
     query = request['query']
     max_new_tokens = int(request['max_new_tokens'])
 
-    inputs = tokenizer(query, return_tensors='pt').to('cuda')
+    inputs = tokenizer(query, return_tensors='pt').to('cpu')
     response = model.generate(**inputs, max_new_tokens=max_new_tokens, stopping_criteria=stopping_criteria)
     response = tokenizer.decode(response[0])
     return {'answer': response}
