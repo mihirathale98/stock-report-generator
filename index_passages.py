@@ -1,0 +1,1 @@
+from src.indexer import FAISSIndexer

@@ -7,14 +7,10 @@ import torch
 
 print(torch.cuda.is_available())
 
-
 earnings_call_files = ['AMC Q4 2020.txt']
 
-
-print("Loading model...")
 model = EncoderModel('distilbert-base-uncased')
 preprocessor = Preprocessor('distilbert-base-uncased')
-print("Initializing index...")
 indexer = FAISSIndexer(768)
 reader = ReaderModel('TinyLlama/TinyLlama-1.1B-Chat-v0.6')
 
@@ -41,17 +37,19 @@ def get_answer(query):
     answer = reader.generate_response(context)
     return answer
 
+
 def retrieve_paragraphs(query_embedding, k=5):
     return indexer.search(query_embedding, k=k)
+
 
 def load_map(path):
     with open(path, 'r') as f:
         ID_2_MAP = json.load(f)
     return ID_2_MAP
 
+
 if __name__ == '__main__':
     build_index(earnings_call_files)
     ID_2_MAP = load_map('id2para_map.json')
-    
-    print(get_answer("How does the call sentiment look like?"))
 
+    print(get_answer("How does the call sentiment look like?"))
