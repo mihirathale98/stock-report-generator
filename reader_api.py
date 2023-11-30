@@ -13,7 +13,7 @@ config = AutoConfig.from_pretrained(hf_model_path, trust_remote_code=True, devic
 config.init_device = "cpu"
 config.max_seq_len = 4096
 device = 'cpu'
-config.attn_config['attn_impl'] = 'triton'
+#config.attn_config['attn_impl'] = 'triton'
 model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
                                              torch_dtype=torch.bfloat16)
 
@@ -61,6 +61,6 @@ async def search(request: dict):
 
 
 if __name__ == '__main__':
-    config = uvicorn.Config("model_api:app", port=8001, workers=2)
+    config = uvicorn.Config("reader_api:app", port=8001, workers=2)
     server = uvicorn.Server(config)
     server.run()
