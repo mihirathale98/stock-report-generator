@@ -44,7 +44,7 @@ class NERDataset(torch.utils.data.Dataset):
                 'labels': inputs['labels']}
 
 
-tokenizer = AutoTokenizer.from_pretrained("distilroberta-base")
+tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 data_collator = DataCollatorForTokenClassification(tokenizer, padding=True)
 
 train_dataset = NERDataset(finer_dataset["train"], tokenizer)
@@ -67,7 +67,7 @@ label2id = {v: k for k, v in id2label.items()}
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 model = AutoModelForTokenClassification.from_pretrained(
-    "distilroberta-base", num_labels=len(finer_tag_names), id2label=id2label, label2id=label2id
+    "bert-base-cased", num_labels=len(finer_tag_names), id2label=id2label, label2id=label2id
 )
 
 model.to(device)
@@ -78,7 +78,7 @@ for param in model.bert.parameters():
     param.requires_grad = False
 
 training_args = TrainingArguments(
-    output_dir="distrob-finer-ner",
+    output_dir="bert-finer-ner",
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=32,

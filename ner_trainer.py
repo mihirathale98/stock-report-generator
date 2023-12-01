@@ -14,7 +14,7 @@ finer_tag_names = finer_dataset["train"].features["ner_tags"].feature.names
 id2label = {i: label for i, label in enumerate(finer_tag_names)}
 label2id = {v: k for k, v in id2label.items()}
 
-tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-cased")
 data_collator = DataCollatorForTokenClassification(tokenizer, padding=True)
 
 train_dataset = NERDataset(finer_dataset["train"], tokenizer)
@@ -36,25 +36,26 @@ model = AutoModelForTokenClassification.from_pretrained(
 )
 
 training_args = TrainingArguments(
-    output_dir="bert-finer-ner",
+    output_dir="dbert-finer-ner",
     learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=2,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=64,
+    num_train_epochs=5,
     weight_decay=0.01,
-    evaluation_strategy="epoch",
+    evaluation_strategy="steps",
     save_strategy="epoch",
-    load_best_model_at_end=True,
-    push_to_hub=True,
+    logging_steps=1000,
+    eval_steps = 1000,
+    gradient_accumulation_steps=8
 )
-
 
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataloader=train_dataloader,
-    eval_dataloader=val_dataloader,
+    train_dataset=train_dataset,
+    eval_dataset=val_dataset,
     tokenizer=tokenizer,
+    data_collator=data_collator,
 )
 
 trainer.train()

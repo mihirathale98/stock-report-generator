@@ -7,15 +7,15 @@ from transformers import LlamaForCausalLM, LlamaTokenizer
 
 app = FastAPI()
 
-# model_ckpt = 'meta-llama/Llama-2-7b-chat-hf'
-# hf_model_path = 'meta-llama/Llama-2-7b-chat-hf'
-# tokenizer = AutoTokenizer.from_pretrained(hf_model_path, trust_remote_code=True)
-# config = AutoConfig.from_pretrained(hf_model_path, trust_remote_code=True, device_map="auto")
-# config.init_device = "cpu"
-# config.max_seq_len = 4096
-# device = 'cpu'
-# #config.attn_config['attn_impl'] = 'triton'
-# model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
+model_ckpt = 'mosaicml/mpt-7b-instruct'
+hf_model_path = 'mosaicml/mpt-7b-instruct'
+tokenizer = AutoTokenizer.from_pretrained(hf_model_path, trust_remote_code=True)
+config = AutoConfig.from_pretrained(hf_model_path, trust_remote_code=True, device_map="auto")
+config.init_device = "cuda"
+config.max_seq_len = 4096
+device = 'cuda'
+config.attn_config['attn_impl'] = 'triton'
+#model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
 #                                              torch_dtype=torch.bfloat16)
 #
 # # llama_config_path = ''
@@ -55,18 +55,18 @@ async def search(request: dict):
     query = request['query']
     max_new_tokens = int(request['max_new_tokens'])
     print(query)
-    #
-    # inputs = tokenizer(query, return_tensors='pt').to('cpu')
-    # response = model.generate(**inputs, max_new_tokens=max_new_tokens, stopping_criteria=stopping_criteria)
-    # response = tokenizer.decode(response[0])
-    # return {'answer': response}
+    
+    inputs = tokenizer(query, return_tensors='pt').to('cuda')
+    response = model.generate(**inputs, max_new_tokens=max_new_tokens, stopping_criteria=stopping_criteria)
+    response = tokenizer.decode(response[0])
+    return {'answer': response}
 
 
 if __name__ == '__main__':
-    config = uvicorn.Config("reader_api:app", port=8001, workers=2)
+    config = uvicorn.Config("reader_api:app",host="127.0.0.1", port=8001, workers=2)
     server = uvicorn.Server(config)
-    ngrok.set_auth_token(input("Enter ngrok auth token: "))
-    public_url = ngrok.connect(8001, bind_tls=True)
-    print(public_url)
+#    ngrok.set_auth_token(input("Enter ngrok auth token: "))
+ #   public_url = ngrok.connect(8001, bind_tls=True)
+  #  print(public_url)
     server.run()
-    ngrok.disconnect(public_url.public_url)
+   # ngrok.disconnect(public_url.public_url)
