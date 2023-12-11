@@ -3,6 +3,10 @@ import requests
 from OpenAI import OpenAI
 import nltk
 
+"""
+This is a sample UI for the Stock Report Generator app using Streamlit and FastAPI
+"""
+
 # Initialize the OpenAI API
 openai_api = OpenAI(api_key="YOUR_KEY", model_name="gpt-3.5-turbo")
 
@@ -23,7 +27,19 @@ additional_instruction = '''Additional Instruction: You are an AI ChatBot which 
 
 
 def get_answer(url, query, context, max_new_tokens=512):
-    """Get response from custom LLM"""
+    '''
+    Get response from custom LLM
+    
+    Args:
+        url (str): API endpoint
+        query (str): Query asked by the user
+        context (str): Context from the transcript
+        max_new_tokens (int): Maximum number of tokens to generate
+        
+    Returns:
+        response (str): Generated response
+        
+    '''
     model_input = '\n\n'.join([
         "Below is an instruction that describes a task. Write a response that appropriately completes the request. ### Instruction:",
         prepend_instruction, additional_instruction, "Context:", context, query, "### Response:"])
@@ -32,14 +48,24 @@ def get_answer(url, query, context, max_new_tokens=512):
 
 
 def get_openai_answer(query, context, max_new_tokens):
-    """Get response from OpenAI"""
+    '''
+    Get response from OpenAI
+    
+    Args:
+        query (str): Query asked by the user
+        context (str): Context from the transcript
+        max_new_tokens (int): Maximum number of tokens to generate
+        
+    Returns:
+        answer (str): Generated response
+    '''
     model_input = '\n\n'.join([
         prepend_instruction, additional_instruction, context, query
     ])
     answer = openai_api.generate(model_input, max_new_tokens=max_new_tokens)
     return answer
 
-
+# Streamlit UI code for the app with sidebar for customizing the parameters for the model and the API endpoints for retrieval and QA
 st.set_page_config(page_title="Stock Report Generator", page_icon="📖", layout="wide")
 
 st.title("Stock Report Generator")

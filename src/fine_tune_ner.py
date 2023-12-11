@@ -4,10 +4,15 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainin
 from transformers import DataCollatorForTokenClassification
 from torch.utils.data import DataLoader
 
+"""
+Fine-tune the BERT model for NER using the Finer dataset from HuggingFace Datasets library and save the model for inference later on.
+"""
 
 # Load the dataset
 finer_dataset = datasets.load_dataset("nlpaueb/finer-139")
 
+
+# Get the tag names
 finer_tag_names = finer_dataset["train"].features["ner_tags"].feature.names
 
 # Select a subset of the data
@@ -17,20 +22,56 @@ finer_dataset['test'] = finer_dataset['test'].shuffle(seed=42).select(range(3000
 
 
 class NERDataset(torch.utils.data.Dataset):
-    """Custom dataset for NER"""
+    """
+    Custom dataset for NER
+    
+    """
     def __init__(self, dataset, tokenizer):
+        """
+        Initialize the dataset
+        
+        Args:
+            dataset (datasets.Dataset): Dataset from HuggingFace Datasets library
+            tokenizer (transformers.AutoTokenizer): Tokenizer from HuggingFace Transformers library
+            
+        """
         self.dataset = dataset
         self.tokenizer = tokenizer
 
     def __len__(self):
+        """
+        Return the length of the dataset
+        
+        Returns:
+            len (int): Length of the dataset
+        """
         return len(self.dataset)
 
     def __getitem__(self, idx):
+        """
+        Get an item from the dataset
+        
+        Args:
+            idx (int): Index of the item to retrieve
+            
+        Returns:
+            item (dict): Dictionary containing the input_ids, attention_mask and labels
+            
+        """
+        # Get the item
         item = self.dataset[idx]
+
+        # Get the text and labels
         text = item["tokens"]
+
+        # Get the labels
         old_labels = item["ner_tags"]
+
+        # Tokenize the text
         inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512, is_split_into_words=True)
         new_labels = []
+
+        # Get the labels for each word
         word_ids = inputs.word_ids(0)
         previous_word_idx = None
         label_ids = []
