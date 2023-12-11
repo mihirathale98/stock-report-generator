@@ -86,6 +86,6 @@ about investing in the stock market.
 ## Contributors
 
 * Mihir Athale
-* Sai Gautham Yadavalli
+* Goutham Yadavalli
 * Daniel Chinn
 * Fabian Christopher
