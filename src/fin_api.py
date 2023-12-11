@@ -1,7 +1,7 @@
 import requests
-import json
 
 
+# Get transcript from API
 def get_jsonparsed_data(company, quarter, year):
     url = (f"https://discountingcashflows.com/api/transcript/{company}/{quarter}/{year}")
     response = requests.get(url)
@@ -9,12 +9,14 @@ def get_jsonparsed_data(company, quarter, year):
     transcript = data[0]['content']
     return transcript
 
+# List the company tickers
+company_tickers = ["AMZN"]
 
-
-all_transcripts = []
-for quarter in ["Q1", "Q2", "Q3", "Q4"]:
-        transcript = get_jsonparsed_data("AMZN", quarter, 2022)
-        all_transcripts.append(transcript)
-
-with open('all_transcripts.json', 'w') as f:
-    json.dump(all_transcripts, f)
+# Fetch and save transcripts for each company
+for ticker in company_tickers:
+    for year in range(2015, 2023):
+        for quarter in ["Q1", "Q2", "Q3", "Q4"]:
+            transcript = get_jsonparsed_data(ticker, quarter, year)
+            lines = transcript.split("\n")
+            with open(f"../earnings_call_transcripts/{ticker}_{quarter}_{year}.txt", 'w') as f:
+                f.writelines(lines)

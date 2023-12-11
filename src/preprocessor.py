@@ -1,15 +1,12 @@
-import re
-import os
 from transformers import AutoTokenizer
 import nltk
-import json
-
 nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 
 
 # Pre processor cleans text and splits the call into paragraphs
 class Preprocessor:
+    """Preprocessor class for text preprocessing"""
     def __init__(self, model_name):
         self.paragraphs = None
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -19,6 +16,7 @@ class Preprocessor:
         return sent_tokenize(text)
 
     def split_into_paragraphs(self, text, max_tokens=512):
+        """Split the text into paragraphs with max length of 512 tokens"""
         sentences = self.split_into_sentences(text)
         self.paragraphs = []
         while len(sentences) > 0:
@@ -28,21 +26,9 @@ class Preprocessor:
                 para = " ".join([para, sentence])
                 sentence = sentences.pop(0)
             self.paragraphs.append(para)
-        self.save_id2para_map()
         return self.paragraphs
 
-    def save_id2para_map(self):
-        if os.path.exists('id2para_map.json'):
-            with open('id2para_map.json', 'r') as f:
-                self.id2para_map = json.load(f)
-            for i, para in enumerate(self.paragraphs):
-                l = len(self.id2para_map.keys())
-                self.id2para_map[i + l - 1] = para
-        else:
-            self.id2para_map = {i: para for i, para in enumerate(self.paragraphs)}
-        print("saving id2para_map")
-        with open('id2para_map.json', 'w') as f:
-            json.dump(self.id2para_map, f)
-
     def clean_text(self, text):
+        # transcripts are already cleaned, hence we haven't applied additional cleaning steps here
+        # we can add cleaning steps according to the data sources
         pass

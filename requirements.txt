@@ -1,0 +1,13 @@
+torch
+transformers
+sentencepiece
+numpy
+tqdm
+accelerate
+bitsandbytes
+sentencepiece
+faiss-cpu
+streamlit
+swig
+fastapi
+uvicorn

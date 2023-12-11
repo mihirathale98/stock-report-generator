@@ -3,7 +3,6 @@ import uvicorn
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList, AutoConfig
 from fastapi import FastAPI
 from pyngrok import ngrok
-from transformers import LlamaForCausalLM, LlamaTokenizer
 
 app = FastAPI()
 
@@ -15,14 +14,8 @@ config.init_device = "cuda"
 config.max_seq_len = 4096
 device = 'cuda'
 config.attn_config['attn_impl'] = 'triton'
-#model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
-#                                              torch_dtype=torch.bfloat16)
-#
-# # llama_config_path = ''
-# config = AutoConfig.from_pretrained(llama_config_path, trust_remote_code=True, device_map="auto")
-# tokenizer = LlamaTokenizer.from_pretrained("/output/path")
-# model = LlamaForCausalLM.from_pretrained("/output/path")
-
+model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
+                                              torch_dtype=torch.bfloat16)
 
 class StoppingCriteriaSub(StoppingCriteria):
 
@@ -54,8 +47,7 @@ async def search(request: dict):
     '''
     query = request['query']
     max_new_tokens = int(request['max_new_tokens'])
-    print(query)
-    
+
     inputs = tokenizer(query, return_tensors='pt').to('cuda')
     response = model.generate(**inputs, max_new_tokens=max_new_tokens, stopping_criteria=stopping_criteria)
     response = tokenizer.decode(response[0])
@@ -63,10 +55,6 @@ async def search(request: dict):
 
 
 if __name__ == '__main__':
-    config = uvicorn.Config("reader_api:app",host="127.0.0.1", port=8001, workers=2)
+    config = uvicorn.Config("reader_api:app",port=8001, workers=2)
     server = uvicorn.Server(config)
-#    ngrok.set_auth_token(input("Enter ngrok auth token: "))
- #   public_url = ngrok.connect(8001, bind_tls=True)
-  #  print(public_url)
     server.run()
-   # ngrok.disconnect(public_url.public_url)

@@ -4,16 +4,20 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainin
 from transformers import DataCollatorForTokenClassification
 from torch.utils.data import DataLoader
 
+
+# Load the dataset
 finer_dataset = datasets.load_dataset("nlpaueb/finer-139")
 
 finer_tag_names = finer_dataset["train"].features["ner_tags"].feature.names
 
+# Select a subset of the data
 finer_dataset['train'] = finer_dataset['train'].shuffle(seed=42).select(range(200000))
 finer_dataset['validation'] = finer_dataset['validation'].shuffle(seed=42).select(range(30000))
 finer_dataset['test'] = finer_dataset['test'].shuffle(seed=42).select(range(30000))
 
 
 class NERDataset(torch.utils.data.Dataset):
+    """Custom dataset for NER"""
     def __init__(self, dataset, tokenizer):
         self.dataset = dataset
         self.tokenizer = tokenizer
@@ -44,13 +48,16 @@ class NERDataset(torch.utils.data.Dataset):
                 'labels': inputs['labels']}
 
 
+# Initialize the tokenizer and the data collator
 tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 data_collator = DataCollatorForTokenClassification(tokenizer, padding=True)
 
+# Initialize the datasets
 train_dataset = NERDataset(finer_dataset["train"], tokenizer)
 val_dataset = NERDataset(finer_dataset["validation"], tokenizer)
 test_dataset = NERDataset(finer_dataset["test"], tokenizer)
 
+# Initialize the dataloaders
 train_dataloader = DataLoader(
     train_dataset, batch_size=8, shuffle=True, collate_fn=data_collator
 )
@@ -61,22 +68,27 @@ test_dataloader = DataLoader(
     test_dataset, batch_size=8, shuffle=True,
 )
 
+# Get the id to label map
 id2label = {i: label for i, label in enumerate(finer_tag_names)}
 label2id = {v: k for k, v in id2label.items()}
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# Initialize the model
 model = AutoModelForTokenClassification.from_pretrained(
     "bert-base-cased", num_labels=len(finer_tag_names), id2label=id2label, label2id=label2id
 )
 
 model.to(device)
 
+# Set the model to train mode
 model.train()
 
+# Freeze the parameters for faster training
 for param in model.bert.parameters():
     param.requires_grad = False
 
+# Initialize the training arguments
 training_args = TrainingArguments(
     output_dir="bert-finer-ner",
     learning_rate=2e-5,
@@ -91,6 +103,7 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=16
 )
 
+# Initialize the trainer
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -100,10 +113,13 @@ trainer = Trainer(
     data_collator=data_collator,
 )
 
+# Train the model
 trainer.train()
 
+# Save the log history
 with open("log_history_ner.txt", 'w') as f:
     f.write(trainer.state.log_history)
 
+# Save the model
 trainer.model.save_pretrained("finer_ner_model")
 trainer.model.save_state_dict("finer_ner_model_st_dict")
