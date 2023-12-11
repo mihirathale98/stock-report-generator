@@ -2,23 +2,23 @@ import torch
 import uvicorn
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList, AutoConfig
 from fastapi import FastAPI
-from pyngrok import ngrok
 
+# Initialize the FastAPI app
 app = FastAPI()
 
-model_ckpt = 'mosaicml/mpt-7b-instruct'
-hf_model_path = 'mosaicml/mpt-7b-instruct'
+# Load the model
+model_ckpt = 'meta-llama/Llama-2-7b-chat-hf'
+hf_model_path = 'meta-llama/Llama-2-7b-chat-hf'
 tokenizer = AutoTokenizer.from_pretrained(hf_model_path, trust_remote_code=True)
 config = AutoConfig.from_pretrained(hf_model_path, trust_remote_code=True, device_map="auto")
 config.init_device = "cuda"
 config.max_seq_len = 4096
 device = 'cuda'
-config.attn_config['attn_impl'] = 'triton'
 model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_remote_code=True,
                                               torch_dtype=torch.bfloat16)
 
 class StoppingCriteriaSub(StoppingCriteria):
-
+    """Custom Stopping Criteria"""
     def __init__(self, stops=[], encounters=1):
         super().__init__()
         self.stops = stops
@@ -34,7 +34,7 @@ class StoppingCriteriaSub(StoppingCriteria):
         return False
 
 
-stopping_criteria = StoppingCriteriaList([StoppingCriteriaSub(stops=[0], encounters=1)])
+stopping_criteria = StoppingCriteriaList([StoppingCriteriaSub(stops=tokenizer.eos_token_id, encounters=1)])
 
 
 @app.post("/qa")
