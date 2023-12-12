@@ -6,11 +6,30 @@ from encoder import EncoderModel
 from preprocessor import Preprocessor
 import torch
 
+'''
+Create the index for the paragraphs
+
+1. Load all the paragraphs
+2. Encode all the paragraphs
+3. Create the index
+4. Save the index and the id2para_map
+
+'''
+
 
 # Check if GPU is available
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 def load_file(file_path):
-    """Loads a file and returns a string"""
+    '''
+    Loads a file and returns a string
+    
+    Args:
+        file_path (str): Path to the file
+        
+    Returns:
+        text (str): Text in the file
+        
+    '''
     with open('../earnings_call_transcripts/' + file_path, 'r') as f:
         return f.read()
 

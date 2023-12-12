@@ -18,13 +18,35 @@ model = AutoModelForCausalLM.from_pretrained(model_ckpt, config=config, trust_re
                                               torch_dtype=torch.bfloat16)
 
 class StoppingCriteriaSub(StoppingCriteria):
-    """Custom Stopping Criteria"""
+    """
+    Stopping criteria for stopping generation when a token is encountered a certain number of times in the output sequence
+
+    """
     def __init__(self, stops=[], encounters=1):
+        """
+        Initialize the stopping criteria
+
+        Args:
+            stops (list): List of tokens to stop generation
+            encounters (int): Number of times to encounter the token before stopping generation
+
+        """
         super().__init__()
         self.stops = stops
         self.ENCOUNTERS = encounters
 
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor):
+        """
+        Check if the stopping criteria is met for the given input_ids and scores and return True if it is met else False
+
+        Args:
+            input_ids (torch.LongTensor): Input ids for the current step
+            scores (torch.FloatTensor): Scores for the current step
+
+        Returns:
+            bool: True if the stopping criteria is met else False
+            
+        """
         stop_count = 0
         for stop in self.stops:
             stop_count = (stop == input_ids[0]).sum().item()

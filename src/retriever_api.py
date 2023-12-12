@@ -5,6 +5,10 @@ from encoder import EncoderModel
 from fastapi import FastAPI
 import uvicorn
 
+"""
+API to retrieve paragraphs from the index for a given query using FAISS index and HuggingFace DistilBERT model for encoding the paragraphs into vectors 
+and the query into a vector and then using the FAISS index to retrieve the top 5 paragraphs for the given query from the index
+"""
 
 app = FastAPI()
 
@@ -24,7 +28,16 @@ index.add(encodings)
 
 @app.post("/retrieve")
 def retrieve_from_index(request: dict):
-    """Retrieve paragraphs from the index"""
+    """
+    Retrieve paragraphs from the index
+    
+    Args:
+        request (dict): Request containing the query
+        
+    Returns:
+        context (str): Context containing the top 5 paragraphs from the index for the given query
+        
+    """
     paragraphs = index.search(model.encode_text([request['query']]).astype(np.float32), 5)
     print(paragraphs)
     context = ""
